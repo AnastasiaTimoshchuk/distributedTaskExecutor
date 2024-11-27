@@ -1,0 +1,46 @@
+services:
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    depends_on:
+      - zookeeper
+    networks:
+      - mynetwork
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: yes
+    ports:
+      - "2181:2181"
+    networks:
+      - mynetwork
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: task_executor
+      POSTGRES_PASSWORD: task_executor
+      POSTGRES_DB: task_executor
+    networks:
+      - mynetwork
+  app:
+#    scale: 2  # количество реплик
+    build: .
+    ports:
+      - "8080:8080"
+    networks:
+      - mynetwork
+    depends_on:
+      - postgres
+      - kafka
+networks:
+  mynetwork:
+    driver: bridge

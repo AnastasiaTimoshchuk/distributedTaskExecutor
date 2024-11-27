@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+config:
+  time-zone: Europe/Moscow
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/task_executor
+    username: task_executor
+    password: task_executor
+  flyway:
+    schemas:
+      - public
+      - task_executor
+  kafka:
+    consumer:
+      bootstrap-servers: kafka:9092
+      group-id: task-executor-service
+      topic: tasks
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+worker-pool:
+  core-poolSize: 25
+  max-pool-size: 100
+  queue-capacity: 200
+  thread-name-prefix: "Worker-"
+
+scheduler:
+  execute-tasks:
+    batch-size: 10
+    rate: 10000
+    max-retries: 3
+  restore-stuck-tasks:
+    batch-size: 100
+    cron: "0 0 */8 * * ?"
+    shift-minutes: 10
